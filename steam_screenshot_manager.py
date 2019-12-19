@@ -29,6 +29,15 @@ def main(args):
 			error(e)
 			error(f"Attempted gameID was `{gameID}`")
 			continue
+		except steamfront.app._AppNotFound as e:
+			error(e)
+			error(f"Attempted gameID was `{gameID}`")
+			continue
+		except:
+			error("Some other error")
+			error(f"Attempted gameID was `{gameID}`")
+			continue
+
 		name = game.name
 		for char in badChars:
 			name = name.replace(char, "_")
@@ -40,7 +49,6 @@ def main(args):
 			n = file.name.split(f"{gameID}_")[1]
 			n = f"{n[:4]}-{n[4:6]}-{n[6:8]}_{n[8:10]}-{n[10:12]}-{n[12:]}"
 			file.replace((args.dir / name / n).with_suffix(file.suffix))
-
 
 
 # ==================================================================================================
