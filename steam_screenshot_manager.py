@@ -16,7 +16,7 @@ def main(args):
 
 	gameList = []
 	for file in fileList:
-		gameID = file.name.split("_")[0]
+		gameID = file.stem.split("_")[0]
 		if gameID not in gameList:
 			gameList.append(gameID)
 	info(f"Identified {len(gameList)} different games")
@@ -39,9 +39,9 @@ def main(args):
 			continue
 
 		name = game.name
+		info(f"{i + 1}/{len(gameList)}: {name}")
 		for char in badChars:
 			name = name.replace(char, "_")
-		info(f"{i + 1}/{len(gameList)}: {game.name}")
 
 		# Make directory, move files over while renaming
 		(args.dir / name).mkdir(exist_ok=True)
