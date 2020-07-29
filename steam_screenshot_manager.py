@@ -11,12 +11,12 @@ from kellog import info, error, debug
 def main(args):
 	client = steamfront.Client()
 
-	fileList = natsorted(args.dir.glob("*.png"))
-	info(f"Found {len(fileList)} screenshots to sort")
+	paths = natsorted(args.dir.glob("*.png"))
+	info(f"Found {len(paths)} screenshots to sort")
 
 	gameList = []
-	for file in fileList:
-		gameID = file.stem.split("_")[0]
+	for path in paths:
+		gameID = path.stem.split("_")[0]
 		if gameID not in gameList:
 			gameList.append(gameID)
 	info(f"Identified {len(gameList)} different games")
@@ -45,10 +45,15 @@ def main(args):
 
 		# Make directory, move files over while renaming
 		(args.dir / name).mkdir(exist_ok=True)
-		for file in natsorted(args.dir.glob(f"{gameID}_*.png")):
-			n = file.name.split(f"{gameID}_")[1]
+		for path in natsorted(args.dir.glob(f"{gameID}_*.png")):
+			n = path.name.split(f"{gameID}_")[1]
 			n = f"{n[:4]}-{n[4:6]}-{n[6:8]}_{n[8:10]}-{n[10:12]}-{n[12:]}"
-			file.replace((args.dir / name / n).with_suffix(file.suffix))
+			dest = (args.dir / name / n).with_suffix(path.suffix)
+			if not dest.exists():
+				path.replace(dest)
+			else:
+				error(f"Destination '{dest.relative_to(args.dir)}' exists when moving '{path.relative_to(args.dir)}'")
+
 
 
 # ==================================================================================================
