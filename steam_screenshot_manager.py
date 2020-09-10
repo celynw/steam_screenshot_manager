@@ -3,7 +3,6 @@ from argparse import ArgumentParser
 from pathlib import Path
 import steamfront
 from natsort import natsorted
-from tqdm import tqdm
 
 from kellog import info, error, debug
 
