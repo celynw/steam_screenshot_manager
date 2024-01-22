@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 from pathlib import Path
+import yaml
 
 import steamfront
 from kellog import error, info
@@ -43,6 +44,13 @@ def get_name(client: steamfront.Client, game_id: str) -> str | None:
 	-------
 		Sanitised game name, or None if the game ID is invalid
 	"""
+	# Check if the game ID is in the replacements file
+	with (Path().cwd() / "replacements.yml").open() as f:
+		replacements = yaml.safe_load(f)
+	if game_id in replacements:
+		return sanitise_name(replacements[game_id])
+
+	# If not, query the steam database
 	try:
 		game = client.getApp(appid=game_id)
 		return sanitise_name(str(game.name))
