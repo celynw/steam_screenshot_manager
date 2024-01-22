@@ -9,7 +9,7 @@ from steamfront.errors import AppNotFound
 
 
 # ======================================================================================================================
-def main(args) -> None:
+def main(args: argparse.Namespace) -> None:
 	client = steamfront.Client()
 
 	paths = natsorted(args.dir.glob("*.png"))
@@ -62,16 +62,13 @@ def parse_args() -> argparse.Namespace:
 	parser.add_argument(
 		"--dir",
 		"-d",
-		type=str,
+		type=Path,
 		metavar="PATH",
 		default=Path.home() / "Pictures" / "Screenshots" / "Steam",
 		help="Directory where the screenshots are stored",
 	)
 
-	args = parser.parse_args()
-	args.dir = Path(args.dir)
-
-	return args
+	return parser.parse_args()
 
 
 # ======================================================================================================================
