@@ -8,10 +8,7 @@ from natsort import natsorted
 from steamfront.errors import AppNotFound
 
 
-# ======================================================================================================================
 def main(args: argparse.Namespace) -> None:
-	client = steamfront.Client()
-
 	paths = natsorted(args.dir.glob("*.png"))
 	info(f"Found {len(paths)} screenshots to sort")
 
@@ -22,42 +19,101 @@ def main(args: argparse.Namespace) -> None:
 			game_list.append(game_id)
 	info(f"Identified {len(game_list)} different games")
 
-	bad_chars = r'<>:"/\|?*'
+	client = steamfront.Client()
 	for i, game_id in enumerate(game_list):
-		try:
-			game = client.getApp(appid=game_id)
-		except TypeError as e:
-			error(e)
-			error(f"Attempted gameID was `{game_id}`")
+		name = get_name(client, game_id)
+		if name is None:
 			continue
-		except AppNotFound as e:
-			error(e)
-			error(f"Attempted gameID was `{game_id}`")
-			continue
-		except:
-			error("Some other error")
-			error(f"Attempted gameID was `{game_id}`")
-			continue
-
-		name = str(game.name)
 		info(f"{i + 1}/{len(game_list)}: {name}")
-		for char in bad_chars:
-			name = name.replace(char, "_")
-
-		# Make directory, move files over while renaming
-		(args.dir / name).mkdir(exist_ok=True)
-		for path in natsorted(args.dir.glob(f"{game_id}_*.png")):
-			n = path.name.split(f"{game_id}_")[1]
-			n = f"{n[:4]}-{n[4:6]}-{n[6:8]}_{n[8:10]}-{n[10:12]}-{n[12:]}"
-			dest = (args.dir / name / n).with_suffix(path.suffix)
-			if not dest.exists():
-				path.replace(dest)
-			else:
-				error(f"Destination '{dest.relative_to(args.dir)}' exists when moving '{path.relative_to(args.dir)}'")
+		move_screenshots(game_id, name, args.dir)
 
 
-# ======================================================================================================================
+def get_name(client: steamfront.Client, game_id: str) -> str | None:
+	"""
+	Retrieve the name of a game given the game ID.
+
+	Parameters
+	----------
+	client
+		Steamfront client
+	game_id
+		Steam game ID, taken from the screenshot filename
+
+	Returns
+	-------
+		Sanitised game name, or None if the game ID is invalid
+	"""
+	try:
+		game = client.getApp(appid=game_id)
+		return sanitise_name(str(game.name))
+	except TypeError as e:
+		error(e)
+		error(f"Attempted gameID was `{game_id}`")
+		return None
+	except AppNotFound as e:
+		error(e)
+		error(f"Attempted gameID was `{game_id}`")
+		return None
+	except:
+		error("Some other error")
+		error(f"Attempted gameID was `{game_id}`")
+		return None
+
+
+def sanitise_name(name: str) -> str:
+	"""
+	Remove/replace characters that are not allowed in filenames.
+
+	Parameters
+	----------
+	name
+		Game name to sanitise
+
+	Returns
+	-------
+		Sanitised game name
+	"""
+	bad_chars = r'<>:"/\|?*'
+	name = str(name)
+	for char in bad_chars:
+		name = name.replace(char, "_")
+
+	return name
+
+
+def move_screenshots(game_id: str, name: str, dir: Path) -> None:
+	"""
+	Move screenshots to a new directory, renaming them in the process.
+
+	Parameters
+	----------
+	game_id
+		Steam game ID, taken from the screenshot file
+	name
+		Sanitised game name
+	dir
+		Screenshot directory
+	"""
+	# Make directory, move files over while renaming
+	(dir / name).mkdir(exist_ok=True)
+	for path in natsorted(dir.glob(f"{game_id}_*.png")):
+		n = path.name.split(f"{game_id}_")[1]
+		n = f"{n[:4]}-{n[4:6]}-{n[6:8]}_{n[8:10]}-{n[10:12]}-{n[12:]}"
+		dest = (dir / name / n).with_suffix(path.suffix)
+		if not dest.exists():
+			path.replace(dest)
+		else:
+			error(f"Destination '{dest.relative_to(dir)}' exists when moving '{path.relative_to(dir)}'")
+
+
 def parse_args() -> argparse.Namespace:
+	"""
+	Parse command line arguments.
+
+	Returns
+	-------
+		Arguments
+	"""
 	parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 	parser.add_argument(
 		"--dir",
@@ -71,6 +127,5 @@ def parse_args() -> argparse.Namespace:
 	return parser.parse_args()
 
 
-# ======================================================================================================================
 if __name__ == "__main__":
 	main(parse_args())
