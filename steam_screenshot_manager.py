@@ -8,7 +8,7 @@ from natsort import natsorted
 from steamfront.errors import AppNotFound
 
 
-# ==================================================================================================
+# ======================================================================================================================
 def main(args) -> None:
     client = steamfront.Client()
 
@@ -56,7 +56,7 @@ def main(args) -> None:
                 error(f"Destination '{dest.relative_to(args.dir)}' exists when moving '{path.relative_to(args.dir)}'")
 
 
-# ==================================================================================================
+# ======================================================================================================================
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
@@ -74,6 +74,6 @@ def parse_args() -> argparse.Namespace:
     return args
 
 
-# ==================================================================================================
+# ======================================================================================================================
 if __name__ == "__main__":
     main(parse_args())
