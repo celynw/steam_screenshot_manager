@@ -1,49 +1,60 @@
 # Steam Screenshot Manager
 
-Steam's 'uncompressed' (actually means losslessly compressed) screenshots are not named for humans.
-This script automatically renames and organises them into game subdirectories.
+Turns this:
 
-e.g.
-
-| Original path             | Modified path                         |
-| ------------------------- | ------------------------------------- |
-| `70_20240122134553_1.png` | `Half-Life/2024-01-22_13-45-53_1.png` |
-
-The components of the original path are:
-
-- Game ID
-- Year
-- Month
-- Day
-- Hours
-- Minutes
-- Seconds
-- Iteration (in rare case of duplicates)
-
-Some games may not be detected.
-Possible reasons are because the game is no longer listed, or it is a non-Steam game.
-Overrides may be listed in the `replacements.yml` file, as :
-
-```yml
-GAME_ID: "Desired title"
+```text
+70_20240115091234_1.png
+70_20240122134553_1.png
+220_20240115091302_1.png
+730_20240201183045_1.png
+730_20240201183112_1.png
+730_20240201183140_1.png
 ```
 
-## Running
+Into this:
 
-Install requirements with:
+```text
+Half-Life/
+├── 2024-01-15_09-12-34_1.png
+└── 2024-01-22_13-45-53_1.png
+Half-Life 2/
+└── 2024-01-15_09-13-02_1.png
+Counter-Strike 2/
+├── 2024-02-01_18-30-45_1.png
+├── 2024-02-01_18-31-12_1.png
+└── 2024-02-01_18-31-40_1.png
+```
+
+Renames and organises Steam's uncompressed screenshots into per-game subdirectories.
+
+## Installation
+
+Requires [`uv`](https://docs.astral.sh/uv/).
 
 ```bash
-pip install -r requirements.txt
+uv tool install /path/to/steam_screenshot_manager
 ```
 
-then run as:
+Then optionally enable tab completion:
 
-```none
-./steam_screenshot_manager.py
-
-usage: steam_screenshot_manager.py [-h] [--dir PATH]
-
-options:
-  -h, --help           show this help message and exit
-  --dir PATH, -d PATH  Directory where the screenshots are stored (default: $HOME/Pictures/Screenshots/Steam)
+```bash
+steam_screenshot_manager --install-completion
 ```
+
+## Usage
+
+```bash
+steam_screenshot_manager -d /path/to/screenshots
+```
+
+## Unrecognised games
+
+Some games may not be found in the Steam database — typically delisted games or non-Steam games added to your library.
+
+You can add overrides to `replacements.yml` in the working directory:
+
+```yaml
+"233250": "Planetary Annihilation"
+```
+
+The key is the Steam game ID (the first component of the original filename).
