@@ -1,7 +1,9 @@
 [project]
 name = "steam_screenshot_manager"
 version = "0.1.0"
-authors = [{ name = "Celyn Walters", email = "3299161+celynw@users.noreply.github.com" }]
+authors = [
+	{ name = "Celyn Walters", email = "3299161+celynw@users.noreply.github.com" },
+]
 requires-python = ">=3.14"
 dependencies = [
 	"kellog>=1.0.1",
