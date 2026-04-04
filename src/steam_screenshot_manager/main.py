@@ -1,16 +1,32 @@
-#!/usr/bin/env python3
-import argparse
+"""steam-screenshot-manager."""
+
 from pathlib import Path
-import yaml
+from typing import Annotated
 
 import steamfront
+import typer
+import yaml
 from kellog import error, info
 from natsort import natsorted
 from steamfront.errors import AppNotFound
 
+app = typer.Typer()
 
-def main(args: argparse.Namespace) -> None:
-	paths = natsorted(args.dir.glob("*.png"))
+
+@app.command()
+def main(
+	directory: Annotated[
+		Path,
+		typer.Option(
+			...,
+			"--dir",
+			"-d",
+			help="Directory where the screenshots are stored",
+		),
+	],
+) -> None:
+	"""Run steam-screenshot-manager."""
+	paths = natsorted(directory.glob("*.png"))
 	info(f"Found {len(paths)} screenshots to sort")
 
 	game_list = []
@@ -26,7 +42,7 @@ def main(args: argparse.Namespace) -> None:
 		if name is None:
 			continue
 		info(f"{i + 1}/{len(game_list)}: {name}")
-		move_screenshots(game_id, name, args.dir)
+		move_screenshots(game_id, name, directory)
 
 
 def get_name(client: steamfront.Client, game_id: str) -> str | None:
@@ -62,8 +78,8 @@ def get_name(client: steamfront.Client, game_id: str) -> str | None:
 		error(e)
 		error(f"Attempted gameID was `{game_id}`")
 		return None
-	except:
-		error("Some other error")
+	except Exception as e:  # noqa: BLE001
+		error(e)
 		error(f"Attempted gameID was `{game_id}`")
 		return None
 
@@ -89,7 +105,7 @@ def sanitise_name(name: str) -> str:
 	return name
 
 
-def move_screenshots(game_id: str, name: str, dir: Path) -> None:
+def move_screenshots(game_id: str, name: str, directory: Path) -> None:
 	"""
 	Move screenshots to a new directory, renaming them in the process.
 
@@ -99,41 +115,23 @@ def move_screenshots(game_id: str, name: str, dir: Path) -> None:
 		Steam game ID, taken from the screenshot file
 	name
 		Sanitised game name
-	dir
+	directory
 		Screenshot directory
 	"""
 	# Make directory, move files over while renaming
-	(dir / name).mkdir(exist_ok=True)
-	for path in natsorted(dir.glob(f"{game_id}_*.png")):
+	(directory / name).mkdir(exist_ok=True)
+	for path in natsorted(directory.glob(f"{game_id}_*.png")):
 		n = path.name.split(f"{game_id}_")[1]
 		n = f"{n[:4]}-{n[4:6]}-{n[6:8]}_{n[8:10]}-{n[10:12]}-{n[12:]}"
-		dest = (dir / name / n).with_suffix(path.suffix)
+		dest = (directory / name / n).with_suffix(path.suffix)
 		if not dest.exists():
 			path.replace(dest)
 		else:
-			error(f"Destination '{dest.relative_to(dir)}' exists when moving '{path.relative_to(dir)}'")
-
-
-def parse_args() -> argparse.Namespace:
-	"""
-	Parse command line arguments.
-
-	Returns
-	-------
-		Arguments
-	"""
-	parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-	parser.add_argument(
-		"--dir",
-		"-d",
-		type=Path,
-		metavar="PATH",
-		default=Path.home() / "Pictures" / "Screenshots" / "Steam",
-		help="Directory where the screenshots are stored",
-	)
-
-	return parser.parse_args()
+			error(
+				f"Destination '{dest.relative_to(directory)}' exists when moving "
+				f"'{path.relative_to(directory)}'",
+			)
 
 
 if __name__ == "__main__":
-	main(parse_args())
+	app()

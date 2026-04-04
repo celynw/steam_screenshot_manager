@@ -1,0 +1,8 @@
+# Changes here will be overwritten by Copier; do not edit
+_commit: v1.2.0
+_src_path: git@github.com:celynw/python-project-template.git
+author_email: 3299161+celynw@users.noreply.github.com
+author_name: Celyn Walters
+project_name: steam-screenshot-manager
+project_slug: steam_screenshot_manager
+python_version: '3.14'
