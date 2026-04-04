@@ -1,5 +1,7 @@
 [project]
+name = "steam_screenshot_manager"
 requires-python = ">=3.11"
+version = "0.1.0"
 
 [tool.ruff]
 line-length = 120

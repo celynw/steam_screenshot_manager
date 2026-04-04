@@ -1,2 +1,4 @@
 steamfront
 natsort
+pyyaml
+kellog
