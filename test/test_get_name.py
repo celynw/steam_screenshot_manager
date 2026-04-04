@@ -1,14 +1,18 @@
-from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
-import pytest
 import yaml
 from steamfront.errors import AppNotFound
+
+if TYPE_CHECKING:
+	from pathlib import Path
+
+	import pytest
 
 from steam_screenshot_manager.main import get_name
 
 
-def write_replacements(directory: Path, content: dict) -> None:
+def write_replacements(directory: Path, content: dict[str, str]) -> None:
 	with (directory / "replacements.yml").open("w") as f:
 		yaml.dump(content, f)
 

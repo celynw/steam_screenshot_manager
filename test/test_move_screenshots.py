@@ -1,6 +1,9 @@
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
+
+if TYPE_CHECKING:
+	from pathlib import Path
 
 from steam_screenshot_manager.main import move_screenshots, sanitise_name
 

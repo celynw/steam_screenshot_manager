@@ -1,8 +1,12 @@
-from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 
-import pytest
 import yaml
+
+if TYPE_CHECKING:
+	from pathlib import Path
+
+	import pytest
 from typer.testing import CliRunner
 
 from steam_screenshot_manager.main import app
