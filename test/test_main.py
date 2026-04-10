@@ -3,6 +3,8 @@ from unittest.mock import MagicMock, patch
 
 import yaml
 
+import steam_screenshot_manager.main as main_mod
+
 if TYPE_CHECKING:
 	from pathlib import Path
 
@@ -16,7 +18,8 @@ runner = CliRunner()
 
 def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 	monkeypatch.chdir(tmp_path)
-	with (tmp_path / "replacements.yml").open("w") as f:
+	parent = tmp_path.parent if tmp_path.name else tmp_path
+	with (parent / "replacements.yml").open("w") as f:
 		yaml.dump({}, f)
 	(tmp_path / "70_20240115091234_1.png").touch()
 	(tmp_path / "70_20240122134553_1.png").touch()
@@ -32,6 +35,7 @@ def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 	mock_client = MagicMock()
 	mock_client.getApp.side_effect = get_app
 
+	monkeypatch.setattr(main_mod, "__file__", str(tmp_path / "dummy.py"))
 	with patch(
 		"steam_screenshot_manager.main.steamfront.Client",
 		return_value=mock_client,
@@ -49,13 +53,15 @@ def test_main_skips_unknown_game(
 	monkeypatch: pytest.MonkeyPatch,
 ) -> None:
 	monkeypatch.chdir(tmp_path)
-	with (tmp_path / "replacements.yml").open("w") as f:
+	parent = tmp_path.parent if tmp_path.name != "" else tmp_path
+	with (parent / "replacements.yml").open("w") as f:
 		yaml.dump({}, f)
 	(tmp_path / "99999_20240115091234_1.png").touch()
 
 	mock_client = MagicMock()
 	mock_client.getApp.side_effect = RuntimeError
 
+	monkeypatch.setattr(main_mod, "__file__", str(tmp_path / "dummy.py"))
 	with patch(
 		"steam_screenshot_manager.main.steamfront.Client",
 		return_value=mock_client,
