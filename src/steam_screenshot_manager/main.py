@@ -61,7 +61,8 @@ def get_name(client: steamfront.Client, game_id: str) -> str | None:
 		Sanitised game name, or None if the game ID is invalid
 	"""
 	# Check if the game ID is in the replacements file
-	with (Path().cwd() / "replacements.yml").open() as f:
+	replacements_path = Path(__file__).parent.parent / "replacements.yml"
+	with replacements_path.open() as f:
 		replacements = yaml.safe_load(f)
 	if game_id in replacements:
 		return sanitise_name(replacements[game_id])
