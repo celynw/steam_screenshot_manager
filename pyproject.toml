@@ -52,6 +52,7 @@ ignore = [
 	"ISC001", # Implicitly concatenated string literals (conflicts with ruff formatter)
 	"TD003",  # Missing issue link on the line following this TODO
 	"W191",   # Indentation contains tabs (formatter handles this)
+	"COM812", # Missing trailing comma in a multi-line collection (formatter handles this)
 ]
 unfixable = [
 	"B007", # Loop control variable not used in loop body
