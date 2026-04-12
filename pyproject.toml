@@ -67,15 +67,19 @@ unfixable = [
 	"D104", # Missing docstring in public package
 ]
 "test/**/*.py" = [
+	"ANN001",  # Allow untyped pytest fixtures like `monkeypatch`
+	"ARG005",  # Allow intentionally unused lambda args in monkeypatched stubs
 	"D100",    # Missing docstring in public module
 	"D103",    # Missing docstring in public function
 	"DOC201",  # `return` is not documented in docstring
 	"FBT",     # Boolean positional args (common in @pytest.mark.parametrize)
 	"INP001",  # File is part of an implicit namespace package
 	"PLR2004", # Magic value used in comparison
+	"S108",    # Allow stable test paths like /tmp fixtures in test literals
 	"SLF001",  # Private member access is acceptable in tests
 	"S101",    # Use of `assert` detected
 	"S311",    # Standard pseudo-random generators
+	"TC003",   # Keep test imports straightforward instead of TYPE_CHECKING blocks
 ]
 
 [tool.ruff.lint.isort]
