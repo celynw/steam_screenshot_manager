@@ -1,5 +1,0 @@
-steamfront
-natsort
-pyyaml
-kellog
-platformdirs
