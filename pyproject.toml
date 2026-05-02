@@ -8,6 +8,7 @@ requires-python = ">=3.14"
 dependencies = [
 	"kellog>=1.0.1",
 	"natsort>=8.4.0",
+	"platformdirs>=4.5.0",
 	"pyyaml>=6.0.3",
 	"steamfront>=0.1.0",
 	"typer>=0.24",
@@ -31,6 +32,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/steam_screenshot_manager"]
+
+[tool.hatch.build]
+include = ["src/steam_screenshot_manager/replacements.yml"]
 
 # Ruff
 [tool.ruff]

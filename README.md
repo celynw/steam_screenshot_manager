@@ -51,10 +51,8 @@ steam_screenshot_manager -d /path/to/screenshots
 
 Some games may not be found in the Steam database — typically delisted games or non-Steam games added to your library.
 
-You can add overrides to `replacements.yml` in the working directory:
+You can add overrides to `replacements.yml` in the user config directory.
+On Linux this is usually `~/.config/steam_screenshot_manager/replacements.yml`.
 
-```yaml
-"233250": "Planetary Annihilation"
-```
-
+The file is created automatically on first run with the bundled defaults.
 The key is the Steam game ID (the first component of the original filename).

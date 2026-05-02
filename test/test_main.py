@@ -16,10 +16,24 @@ from steam_screenshot_manager.main import app
 runner = CliRunner()
 
 
+def setup_config_dir(
+	tmp_path: Path,
+	monkeypatch: pytest.MonkeyPatch,
+) -> Path:
+	config_dir = tmp_path / ".config"
+	monkeypatch.setattr(
+		main_mod,
+		"user_config_path",
+		lambda *args, **kwargs: config_dir,
+	)
+	return config_dir
+
+
 def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 	monkeypatch.chdir(tmp_path)
-	parent = tmp_path.parent if tmp_path.name else tmp_path
-	with (parent / "replacements.yml").open("w") as f:
+	config_dir = setup_config_dir(tmp_path, monkeypatch)
+	config_dir.mkdir(parents=True, exist_ok=True)
+	with (config_dir / "replacements.yml").open("w", encoding="utf-8") as f:
 		yaml.dump({}, f)
 	(tmp_path / "70_20240115091234_1.png").touch()
 	(tmp_path / "70_20240122134553_1.png").touch()
@@ -35,7 +49,6 @@ def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 	mock_client = MagicMock()
 	mock_client.getApp.side_effect = get_app
 
-	monkeypatch.setattr(main_mod, "__file__", str(tmp_path / "dummy.py"))
 	with patch(
 		"steam_screenshot_manager.main.steamfront.Client",
 		return_value=mock_client,
@@ -53,15 +66,15 @@ def test_main_skips_unknown_game(
 	monkeypatch: pytest.MonkeyPatch,
 ) -> None:
 	monkeypatch.chdir(tmp_path)
-	parent = tmp_path.parent if tmp_path.name != "" else tmp_path
-	with (parent / "replacements.yml").open("w") as f:
+	config_dir = setup_config_dir(tmp_path, monkeypatch)
+	config_dir.mkdir(parents=True, exist_ok=True)
+	with (config_dir / "replacements.yml").open("w", encoding="utf-8") as f:
 		yaml.dump({}, f)
 	(tmp_path / "99999_20240115091234_1.png").touch()
 
 	mock_client = MagicMock()
 	mock_client.getApp.side_effect = RuntimeError
 
-	monkeypatch.setattr(main_mod, "__file__", str(tmp_path / "dummy.py"))
 	with patch(
 		"steam_screenshot_manager.main.steamfront.Client",
 		return_value=mock_client,

@@ -1,5 +1,6 @@
 """steam-screenshot-manager."""
 
+from importlib import resources
 from pathlib import Path
 from typing import Annotated
 
@@ -8,9 +9,12 @@ import typer
 import yaml
 from kellog import error, info
 from natsort import natsorted
+from platformdirs import user_config_path
 from steamfront.errors import AppNotFound
 
 app = typer.Typer()
+APP_NAME = "steam_screenshot_manager"
+REPLACEMENTS_FILE = "replacements.yml"
 
 
 @app.command()
@@ -61,9 +65,7 @@ def get_name(client: steamfront.Client, game_id: str) -> str | None:
 		Sanitised game name, or None if the game ID is invalid
 	"""
 	# Check if the game ID is in the replacements file
-	replacements_path = Path(__file__).parent.parent / "replacements.yml"
-	with replacements_path.open() as f:
-		replacements = yaml.safe_load(f)
+	replacements = load_replacements()
 	if game_id in replacements:
 		return sanitise_name(replacements[game_id])
 
@@ -83,6 +85,43 @@ def get_name(client: steamfront.Client, game_id: str) -> str | None:
 		error(e)
 		error(f"Attempted gameID was `{game_id}`")
 		return None
+
+
+def get_replacements_path() -> Path:
+	"""
+	Return the user replacements file, creating it from bundled defaults.
+
+	Returns
+	-------
+		Path to the user replacements file
+	"""
+	config_dir = Path(user_config_path(APP_NAME, ensure_exists=True))
+	config_dir.mkdir(parents=True, exist_ok=True)
+	replacements_path = config_dir / REPLACEMENTS_FILE
+	if not replacements_path.exists():
+		default_replacements = resources.files(APP_NAME).joinpath(REPLACEMENTS_FILE)
+		replacements_path.write_text(
+			default_replacements.read_text(encoding="utf-8"),
+			encoding="utf-8",
+		)
+	return replacements_path
+
+
+def load_replacements() -> dict[str, str]:
+	"""
+	Load replacements from the user config directory.
+
+	Returns
+	-------
+		Configured game ID replacements
+	"""
+	with get_replacements_path().open(encoding="utf-8") as replacements_file:
+		replacements = yaml.safe_load(replacements_file) or {}
+	if isinstance(replacements, dict):
+		return {str(game_id): str(name) for game_id, name in replacements.items()}
+
+	error("Invalid replacements config, expected a mapping")
+	return {}
 
 
 def sanitise_name(name: str) -> str:
